@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+body {
+  font: 10px sans-serif;
+}
+
+.chord path {
+  fill-opacity: .67;
+  stroke: #000;
+  stroke-width: .5px;
+}
+
+</style>
+<body>
+<p>Flights between airports</p>
+<ol>
+  <li>ORD</li>
+  <li>ATL</li>
+  <li>DEN</li>
+  <li>MIA</li>
+  <li>LAX</li>
+  <li>MSP</li>
+  <li>DTW</li>
+  <li>JFK</li>
+  <li>DFW</li>
+  <li>EWR</li>
+  <li>IAH</li>
+  <li>IAD</li>
+  <li>CLT</li>
+  <li>PHL</li>
+  <li>BOS</li>
+  <li>MCO</li>
+  <li>ANC</li>
+  <li>LGA</li>
+  <li>SFO</li>
+  <li>LAS</li>
+</ol>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script>
+
+// Data from http://www.transtats.bts.gov/
+var matrix = [[0, 78, 127, 182, 239, 349, 440, 490, 551, 601, 640, 677, 741, 818, 872, 901, 925, 974, 1014, 1050], [1128, 0, 71, 111, 150, 189, 231, 250, 292, 345, 389, 458, 506, 583, 629, 666, 675, 725, 766, 805], [855, 923, 0, 19, 91, 185, 248, 277, 351, 373, 420, 440, 463, 498, 528, 571, 596, 654, 698, 763], [812, 876, 896, 0, 31, 59, 80, 110, 121, 165, 207, 248, 272, 299, 322, 362, 363, 390, 410, 428], [481, 516, 585, 614, 0, 43, 70, 119, 186, 230, 257, 295, 311, 352, 409, 457, 480, 507, 581, 648], [757, 800, 891, 917, 963, 0, 37, 67, 148, 203, 262, 323, 375, 454, 514, 562, 576, 628, 670, 727], [820, 853, 917, 937, 966, 999, 0, 23, 92, 145, 207, 258, 346, 413, 453, 489, 493, 545, 568, 606], [647, 664, 697, 732, 785, 811, 835, 0, 27, 37, 54, 93, 133, 166, 203, 234, 239, 241, 288, 334], [394, 436, 511, 525, 576, 653, 724, 758, 0, 48, 106, 148, 171, 214, 269, 302, 310, 375, 414, 446], [493, 547, 575, 617, 664, 727, 778, 789, 835, 0, 21, 82, 118, 144, 208, 248, 275, 281, 300, 322], [362, 408, 447, 480, 510, 571, 631, 648, 709, 726, 0, 32, 61, 86, 105, 130, 150, 183, 204, 223], [252, 312, 333, 371, 405, 463, 513, 551, 592, 662, 693, 0, 40, 60, 108, 120, 127, 179, 203, 219], [277, 322, 343, 367, 389, 444, 534, 576, 596, 629, 657, 702, 0, 33, 65, 85, 85, 160, 176, 188], [263, 338, 369, 399, 436, 514, 579, 602, 635, 672, 696, 715, 743, 0, 49, 80, 83, 128, 163, 199], [259, 302, 337, 357, 414, 471, 506, 545, 594, 662, 679, 723, 750, 803, 0, 52, 66, 89, 136, 173], [203, 247, 283, 319, 366, 406, 442, 470, 495, 528, 557, 571, 591, 623, 672, 0, 3, 42, 78, 111], [137, 145, 164, 169, 197, 214, 217, 227, 234, 245, 266, 268, 268, 268, 289, 294, 0, 0, 12, 13], [56, 103, 156, 188, 219, 281, 336, 344, 396, 405, 439, 494, 573, 613, 637, 683, 688, 0, 24, 62], [102, 143, 179, 199, 270, 308, 328, 374, 413, 437, 459, 484, 496, 532, 575, 608, 623, 637, 0, 43], [73, 112, 171, 186, 248, 305, 335, 381, 415, 442, 467, 483, 500, 535, 571, 606, 613, 642, 689, 0]];
+
+var airports = ['ORD', 'ATL', 'DEN', 'MIA', 'LAX', 'MSP', 'DTW', 'JFK', 'DFW', 'EWR', 'IAH', 'IAD', 'CLT', 'PHL', 'BOS', 'MCO', 'ANC', 'LGA', 'SFO', 'LAS'];
+
+var chord = d3.layout.chord()
+    .padding(.05)
+    .sortSubgroups(d3.descending)
+    .matrix(matrix);
+
+var width = 1000,
+    height = 700,
+    innerRadius = Math.min(width, height) * .41,
+    outerRadius = innerRadius * 1.1;
+
+var fill = d3.scale.category20();
+
+var svg = d3.select("body").append("svg")
+    .attr("width", width)
+    .attr("height", height)
+  .append("g")
+    .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+svg.append("g")
+    .attr("class", "arc")
+  .selectAll("path")
+    .data(chord.groups)
+  .enter().append("path")
+    .style("fill", function(d) { return fill(d.index); })
+    .style("stroke", function(d) { return fill(d.index); })
+    .attr("d", d3.svg.arc().innerRadius(innerRadius).outerRadius(outerRadius))
+    .on("mouseover", fade(.1))
+    .on("mouseout", fade(1));
+
+svg.append("g")
+    .attr("class", "chord")
+  .selectAll("path")
+    .data(chord.chords)
+  .enter().append("path")
+    .attr("d", d3.svg.chord().radius(innerRadius))
+    .style("fill", function(d) { return fill(d.target.index); })
+    .style("opacity", 1)
+    .on("mouseover", fadeArc(.1))
+    .on("mouseout", fadeArc(1));
+
+
+// Returns an event handler for fading a given chord group.
+function fade(opacity) {
+  return function(g, i) {
+    svg.selectAll(".chord path")
+        .filter(function(d) { return d.source.index != i && d.target.index != i; })
+      .transition()
+        .style("opacity", opacity);
+  };
+}
+function fadeArc(opacity) {
+  return function(g, i) {
+    var pathUnderMouse = this;
+    svg.selectAll(".chord path")
+        .filter(function(d) { return (this !== pathUnderMouse); })
+      .transition()
+        .style("opacity", opacity);
+  };
+}
+
+</script>
